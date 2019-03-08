@@ -1,0 +1,31 @@
+apiVersion: skaffold/v1beta2
+kind: Config
+build:
+  tagPolicy:
+    envTemplate:
+      template: "{{.DOCKER_REGISTRY}}/shreya1396/cmsui:{{.VERSION}}"
+  artifacts:
+  - imageName: changeme
+    workspace: .
+    docker: {}
+  local: {}
+deploy:
+  kubectl:
+    manifests:
+profiles:
+- name: dev
+  build:
+    tagPolicy:
+      envTemplate:
+        template: "{{.DOCKER_REGISTRY}}/shreya1396/cmsui:{{.DIGEST_HEX}}"
+    artifacts:
+    - docker: {}
+    local: {}
+  deploy:
+    helm:
+      releases:
+      - name: cmsui
+        chartPath: charts/cmsui
+        setValueTemplates:
+          image.repository: "{{.DOCKER_REGISTRY}}/shreya1396/cmsui"
+          image.tag: "{{.DIGEST_HEX}}"
